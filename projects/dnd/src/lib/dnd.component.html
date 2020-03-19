@@ -1,0 +1,17 @@
+<!-- <div class="gridster-column" *ngFor="let column of gridColumns; let i = index;"
+  [ngStyle]="gridRenderer.getGridColumnStyle(i)"></div>
+<div class="gridster-row" *ngFor="let row of gridRows; let i = index;" [ngStyle]="gridRenderer.getGridRowStyle(i)">
+</div> -->
+<!-- 列格子  划分容器-->
+<div class="dnd-column" *ngFor="let colCell of layoutColumns;trackBy: trackByIndex" [ngStyle]="colCell.position">
+
+</div>
+
+<!-- 行格子 划分容器-->
+<div class="dnd-row" *ngFor="let colRow of layoutRows;trackBy: trackByIndex" [ngStyle]="colRow.position" 
+>
+
+</div>
+<!-- 放置 -->
+<ng-content #content></ng-content>
+<!-- <gridster-preview class="gridster-preview"></gridster-preview> -->
