@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Subject } from 'rxjs';
-import { DndCellComponent } from '../dnd-cell/dnd-cell.component';
+import { DndGridComponent } from '../dnd-grid/dnd-grid.component';
+import { ResizeDirection } from '../dnd-grid/dnd-grid.interface';
 // 拖拽事件
 @Injectable({ providedIn: 'root' })
 export class DndService {
@@ -39,7 +40,7 @@ export class DndService {
     }
 
     /* 交换网格 */
-    swapCell(draggedCell: DndCellComponent, swapedCell: DndCellComponent) {
+    swapGrid(draggedCell: DndGridComponent, swapedCell: DndGridComponent) {
         // 保存被交换的网格位置
         swapedCell.lastX = swapedCell.x;
         swapedCell.lastY = swapedCell.y;
@@ -55,6 +56,19 @@ export class DndService {
         // 保存拖拽网格的位置
         draggedCell.lastX = draggedCell.x;
         draggedCell.lastY = draggedCell.y;
+    }
+
+    /* 缩放网格 */
+    resizeGrid(originalXY: any, mouseXY: any) {
+        // 当前鼠标位置
+        const { mouseX, mouseY } = mouseXY;
+        // 上次鼠标位置
+        const originalX = originalXY.originalMouseLeft;
+        const originalY = originalXY.originalMouseTop;
+        return {
+            offsetX: mouseX - originalX,
+            offsetY: mouseY - originalY
+        };
     }
 
 }

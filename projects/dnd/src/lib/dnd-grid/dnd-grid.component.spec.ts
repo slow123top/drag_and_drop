@@ -1,20 +1,20 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { DndCellComponent } from './dnd-cell.component';
+import { DndGridComponent } from './dnd-grid.component';
 
 describe('DndComponent', () => {
-  let component: DndCellComponent;
-  let fixture: ComponentFixture<DndCellComponent>;
+  let component: DndGridComponent;
+  let fixture: ComponentFixture<DndGridComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [DndCellComponent]
+      declarations: [DndGridComponent]
     })
       .compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(DndCellComponent);
+    fixture = TestBed.createComponent(DndGridComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

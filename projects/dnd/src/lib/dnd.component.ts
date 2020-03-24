@@ -5,13 +5,12 @@ import {
 import { DndOptions } from './dnd.interface';
 import { DndRenderService } from './service/dnd-render.service';
 import { DndService } from './service/dnd.service';
-import { DndCellOptions } from './dnd-cell/dnd-cell-interface';
-import { DndCellComponent } from './dnd-cell/dnd-cell.component';
+import { DndGridOptions } from './dnd-grid/dnd-grid.interface';
+import { DndGridComponent } from './dnd-grid/dnd-grid.component';
 @Component({
-  selector: 'farris-dnd',
+  selector: 'dnd',
   templateUrl: './dnd.component.html',
   styleUrls: ['./dnd.component.css']
-  // encapsulation: ViewEncapsulation.None
 })
 export class DndComponent implements OnInit, OnChanges, AfterContentInit {
 
@@ -26,7 +25,7 @@ export class DndComponent implements OnInit, OnChanges, AfterContentInit {
   // 元素是否可交换
   @Input() swapable = true;
   // 允许外部拖入
-  @Input() externalDragIn = false;
+  @Input() externalDragIn = true;
   // 网格允许伸缩
   @Input() resizable = true;
   // event
@@ -46,7 +45,7 @@ export class DndComponent implements OnInit, OnChanges, AfterContentInit {
   cellHeight: number;
 
   // 网格集合
-  dndCells: DndCellComponent[] = [];
+  dndCells: DndGridComponent[] = [];
 
   // 划分布局
   layoutColumns: any;
@@ -54,7 +53,7 @@ export class DndComponent implements OnInit, OnChanges, AfterContentInit {
 
   @ViewChild('viewRef', { read: ViewContainerRef }) content: ViewContainerRef;
 
-  @ContentChildren(DndCellComponent) cells: QueryList<DndCellComponent>;
+  @ContentChildren(DndGridComponent) cells: QueryList<DndGridComponent>;
 
   // 容器内的格子  用于划分容器
   constructor(
@@ -66,14 +65,14 @@ export class DndComponent implements OnInit, OnChanges, AfterContentInit {
   ) { }
 
   ngOnInit() {
-    // this.ngZone.runOutsideAngular(() => {
-    //   if (this.externalDragIn) {
-    //     const dragOverEvent = this.dragOver.bind(this);
-    //     const dropEvent = this.drop.bind(this);
-    //     this.el.nativeElement.addEventListener('dragover', dragOverEvent);
-    //     this.el.nativeElement.addEventListener('drop', dropEvent);
-    //   }
-    // });
+    this.ngZone.runOutsideAngular(() => {
+      if (this.externalDragIn) {
+        const dragOverEvent = this.dragOver.bind(this);
+        const dropEvent = this.drop.bind(this);
+        this.el.nativeElement.addEventListener('dragover', dragOverEvent);
+        this.el.nativeElement.addEventListener('drop', dropEvent);
+      }
+    });
   }
 
   ngOnChanges() {
@@ -100,11 +99,16 @@ export class DndComponent implements OnInit, OnChanges, AfterContentInit {
 
     // 共享单元格尺寸
     this.dndService.initCellSize.next({ cellWidth: this.cellWidth, cellHeight: this.cellHeight });
+
     // 布局单元格
-    this.cells.forEach((cell: DndCellComponent) => {
-      cell.setSize();
-      cell.setPosition();
-      this.dndCells.push(cell);
+    const gridArray = this.cells.toArray();
+    gridArray.forEach((grid: DndGridComponent) => {
+      if (grid.x === -1 || grid.y === -1) {
+        // 如果存在坐标为负值 寻找下一个位置
+      }
+      grid.doSetSize(grid.cols * this.cellWidth, grid.rows * this.cellHeight);
+      grid.doSetPosition(grid.x * this.cellWidth, grid.y * this.cellHeight);
+      this.dndCells.push(grid);
     });
     // 共享单元格组合
     this.dndService.dndContainer.next(this);
@@ -123,22 +127,27 @@ export class DndComponent implements OnInit, OnChanges, AfterContentInit {
     // 计算坐标
     const x = Math.floor(offsetDndContainerLeft / this.cellWidth);
     const y = Math.floor(offsetDndContainerTop / this.cellHeight);
+    console.log(x, y);
     // 检测冲突
     const conflictGrid = this.dndService.checkPositionConflicts(this.dndCells, { x, y });
     if (!conflictGrid) {
       // 如果不冲突  即空单元格  可放置  动态创建dndGrid
-      const componentFactory = this.componentFactoryResolver.resolveComponentFactory(DndCellComponent);
+      const componentFactory = this.componentFactoryResolver.resolveComponentFactory(DndGridComponent);
       const newDndGridCmp = this.content.createComponent(componentFactory);
+      this.cells.reset([newDndGridCmp.instance, ...this.cells.toArray()]);
       newDndGridCmp.instance.x = x;
-      newDndGridCmp.instance.x = y;
+      newDndGridCmp.instance.y = y;
       newDndGridCmp.instance.rows = 1;
       newDndGridCmp.instance.cols = 1;
       newDndGridCmp.instance.identify = '1111';
       newDndGridCmp.instance.cellHeight = this.cellHeight;
       newDndGridCmp.instance.cellWidth = this.cellWidth;
-      newDndGridCmp.instance.setSize();
-      newDndGridCmp.instance.setPosition();
-      this.cells.reset([...this.cells.toArray(), newDndGridCmp.instance]);
+      // newDndGridCmp.instance.setSize();
+      // newDndGridCmp.instance.setPosition();
+      newDndGridCmp.instance.ngOnInit();
+      // const dragStartEvent = newDndGridCmp.
+      // newDndGridCmp.location.nativeElement.addEventListener('dragstart', dragStartEvent);
+      // newDndGridCmp.injector.get
     } else {
       // todo
       // 网格自动布局
@@ -146,7 +155,7 @@ export class DndComponent implements OnInit, OnChanges, AfterContentInit {
   }
 
   // 添加网格
-  addCell(dndCellComponent: DndCellOptions) {
+  addCell(dndCellComponent: DndGridComponent) {
     // dndCellComponent.cols = th
     // this.dndCells.push(dndCellComponent);
   }

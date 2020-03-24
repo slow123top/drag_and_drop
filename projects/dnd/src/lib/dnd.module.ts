@@ -1,14 +1,14 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DndComponent } from './dnd.component';
-import { DndCellComponent } from './dnd-cell/dnd-cell.component';
+import { DndGridComponent } from './dnd-grid/dnd-grid.component';
 
 @NgModule({
-  declarations: [DndComponent, DndCellComponent],
+  declarations: [DndComponent, DndGridComponent],
   imports: [
     CommonModule
   ],
-  entryComponents: [DndCellComponent],
-  exports: [DndComponent, DndCellComponent]
+  entryComponents: [DndGridComponent],
+  exports: [DndComponent, DndGridComponent]
 })
 export class DndModule { }

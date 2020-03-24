@@ -1,0 +1,78 @@
+:host {
+  background-color: #fff;
+  position: absolute;
+  border: 1px solid;
+}
+
+:host:hover {
+  cursor: move;
+}
+
+.dnd-grid-resize-handler {
+  position: absolute;
+}
+
+.dnd-grid-resize-handler.handler-n {
+  width: 100%;
+  height: 10px;
+  left: 0;
+  top: 0;
+  right: 0;
+  cursor: n-resize;
+}
+
+.dnd-grid-resize-handler.handler-s {
+  width: 100%;
+  height: 10px;
+  left: 0;
+  bottom: 0;
+  cursor: s-resize;
+}
+
+.dnd-grid-resize-handler.handler-w {
+  width: 10px;
+  height: 100%;
+  left: 0;
+  top: 0;
+  cursor: w-resize;
+}
+
+.dnd-grid-resize-handler.handler-e {
+  width: 10px;
+  height: 100%;
+  right: 0;
+  top: 0;
+  cursor: e-resize;
+}
+
+.dnd-grid-resize-handler.handler-sw {
+  width: 10px;
+  height: 10px;
+  left: 0;
+  bottom: 0;
+  cursor: sw-resize;
+}
+
+.dnd-grid-resize-handler.handler-se {
+  width: 10px;
+  height: 10px;
+  right: 0;
+  bottom: 0;
+  cursor: se-resize;
+}
+
+.dnd-grid-resize-handler.handler-ne {
+  width: 10px;
+  height: 10px;
+  right: 0;
+  top: 0;
+  cursor: ne-resize;
+}
+
+.dnd-grid-resize-handler.handler-nw {
+  width: 10px;
+  height: 10px;
+  left: 0;
+  top: 0;
+  cursor: nw-resize;
+}

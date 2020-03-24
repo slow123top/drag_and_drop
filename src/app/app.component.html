@@ -1,20 +1,12 @@
 <!--The content below is only a placeholder and can be replaced.-->
 <div style="width:1200px;height:600px;">
-  <farris-dnd [rows]="5" [cols]="6">
-    <farris-dnd-cell *ngFor="let cell of cellInfo;trackBy: trackById"
-    [rows]="cell.rows" 
-    [cols]="cell.cols"
-    [x]="cell.x"
-    [y]="cell.y"
-    [identify]="cell.identify"
-    [style.backgroudColor]="cell.bgColor"
-    >
+  <dnd [rows]="5" [cols]="6">
+    <dnd-grid *ngFor="let cell of cellInfo;trackBy: trackById" [rows]="cell.rows" [cols]="cell.cols" [x]="cell.x"
+      [y]="cell.y" [identify]="cell.identify">
       {{cell.identify}}
-    </farris-dnd-cell>
-  </farris-dnd>
+    </dnd-grid>
+  </dnd>
 </div>
 
 <!-- <div draggable="true">文本框</div> -->
 <!-- <div (dragover)="$event.preventDefault();" (drop)="drop($event)">容器</div> -->
-
-<!-- <router-outlet></router-outlet> -->

@@ -11,7 +11,7 @@
 :host .dnd-column, :host .dnd-row {
     position: absolute;
     /* display: none; */
-    transition: .3s;
+    /* transition: .3s; */
     box-sizing: border-box;
 }
 

@@ -1,4 +1,4 @@
-import { DndCellOptions } from './dnd-cell/dnd-cell-interface';
+import { DndGridOptions } from './dnd-grid/dnd-grid.interface';
 
 export interface DndOptions {
     // 尺寸
@@ -8,5 +8,5 @@ export interface DndOptions {
     cols?: number;
     rows?: number;
     // 单元格配置
-    cells: DndCellOptions[];
+    cells: DndGridOptions[];
 }
