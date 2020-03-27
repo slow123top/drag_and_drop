@@ -6,18 +6,6 @@ export class DndResizeService {
 
     constructor() {
     }
-    /* 缩放网格 */
-    resizeGrid(originalXY: any, mouseXY: any) {
-        // 当前鼠标位置
-        const { mouseX, mouseY } = mouseXY;
-        // 上次鼠标位置
-        const originalX = originalXY.originalMouseLeft;
-        const originalY = originalXY.originalMouseTop;
-        return {
-            offsetX: mouseX - originalX,
-            offsetY: mouseY - originalY
-        };
-    }
 
     /* 根据方向 变换尺寸和位置 */
     resizeByDirection(size: any, position: any, offsetXY: any) {
@@ -65,6 +53,19 @@ export class DndResizeService {
         const cloneDefaultInfo = Object.assign({}, defaultInfo);
         cloneDefaultInfo.width = info.width + info.offsetX;
         return cloneDefaultInfo;
+    }
+
+
+    /* 获取缩放网格偏移量 */
+    resizeOffsetXY(originalXY: any, mouseXY: any) {
+        // 当前鼠标位置
+        const { mouseX, mouseY } = mouseXY;
+        // 上次鼠标位置
+        const { originalX, originalY } = originalXY;
+        return {
+            offsetX: mouseX - originalX,
+            offsetY: mouseY - originalY
+        };
     }
 
 

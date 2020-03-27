@@ -1,19 +1,23 @@
 <ng-container #viewRef></ng-container>
 <ng-content></ng-content>
+<!-- 拖拽抓手 -->
+<!-- <div class="dnd-handler" (resizeMousedown)="dragStart($event)"></div> -->
+<!-- 删除抓手 -->
+<!-- <div class="dnd-remove-handler" (click)="remove($event)"></div> -->
 <!-- 定义resize抓手 -->
 <!-- 北 -->
-<div class="dnd-grid-resize-handler handler-n" (mousedown)="mousedown($event)"></div>
+<div class="dnd-grid-resize-handler handler-n" (mousedown)="resizeMousedown($event)"></div>
 <!-- 南 -->
-<div class="dnd-grid-resize-handler handler-s" (mousedown)="mousedown($event)"></div>
+<div class="dnd-grid-resize-handler handler-s" (mousedown)="resizeMousedown($event)"></div>
 <!-- 西 -->
-<div class="dnd-grid-resize-handler handler-w" (mousedown)="mousedown($event)"></div>
+<div class="dnd-grid-resize-handler handler-w" (mousedown)="resizeMousedown($event)"></div>
 <!-- 东 -->
-<div class="dnd-grid-resize-handler handler-e" (mousedown)="mousedown($event)"></div>
+<div class="dnd-grid-resize-handler handler-e" (mousedown)="resizeMousedown($event)"></div>
 <!-- 西北 -->
-<div class="dnd-grid-resize-handler handler-nw" (mousedown)="mousedown($event)"></div>
+<div class="dnd-grid-resize-handler handler-nw" (mousedown)="resizeMousedown($event)"></div>
 <!-- 东北 -->
-<div class="dnd-grid-resize-handler handler-ne" (mousedown)="mousedown($event)"></div>
+<div class="dnd-grid-resize-handler handler-ne" (mousedown)="resizeMousedown($event)"></div>
 <!-- 西南 -->
-<div class="dnd-grid-resize-handler handler-sw" (mousedown)="mousedown($event)"></div>
+<div class="dnd-grid-resize-handler handler-sw" (mousedown)="resizeMousedown($event)"></div>
 <!-- 东南 -->
-<div class="dnd-grid-resize-handler handler-se" (mousedown)="mousedown($event)"></div>
+<div class="dnd-grid-resize-handler handler-se" (mousedown)="resizeMousedown($event)"></div>

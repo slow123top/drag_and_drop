@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, ElementRef, Renderer2, NgZone, HostListener, OnDestroy, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, Input, ElementRef, Renderer2, NgZone, OnDestroy, Output, EventEmitter } from '@angular/core';
 import { DndGridOptions } from './dnd-grid.interface';
 import { DndComponent } from '../dnd.component';
 import { DndService } from '../service/dnd.service';
@@ -34,14 +34,6 @@ export class DndGridComponent implements DndGridOptions, OnInit, OnDestroy {
   cellWidth: number;
   cellHeight: number;
 
-  // 当前网格尺寸
-  // get size() {
-  //   return {
-  //     width: this.cols * this.cellWidth,
-  //     height: this.rows * this.cellHeight
-  //   };
-  // }
-
   width: number;
   height: number;
 
@@ -59,11 +51,12 @@ export class DndGridComponent implements DndGridOptions, OnInit, OnDestroy {
 
   // 缩放事件
   resizeDirection: string;
-  mouseDownEvent: any;
-  mouseMoveEvent: any;
-  mouseUpEvent: any;
+  resizeMouseDownEvent: any;
+  resizeMouseMoveEvent: any;
+  resizeMouseUpEvent: any;
 
   // 拖拽事件
+  dndMouseDown: any;
   dragStartEvent: any;
   dragOverEvent: any;
   dragEndEvent: any;
@@ -72,78 +65,68 @@ export class DndGridComponent implements DndGridOptions, OnInit, OnDestroy {
   dragging: boolean;
   moving: boolean;
   // 所有格子组合
-  dndCells: DndGridComponent[];
 
-  // 拖拽容器
-  dndContainer: DndComponent;
   // 单元格配置
-  // 是否可交换
-  swapable: boolean;
-
-  // 单元格顺序
   // order: number;
   constructor(
     private el: ElementRef,
     private render: Renderer2,
     private ngZone: NgZone,
     private dndService: DndService,
-    private resizeService: DndResizeService) { }
+    private resizeService: DndResizeService,
+    private gridContainer: DndComponent) {
+  }
 
   ngOnInit() {
-    // 获取初始化单元格尺寸
-    this.dndService.initCellSize.subscribe(result => {
-      this.cellWidth = result.cellWidth;
-      this.cellHeight = result.cellHeight;
-    });
+    // 添加grid
+    this.gridContainer.addGrid(this);
+    this.render.setStyle(this.el.nativeElement, 'transition', '.2s');
+    this.dndMouseDown = this.gridMouseDown.bind(this);
+    this.el.nativeElement.addEventListener('mousedown', this.dndMouseDown);
 
-    // 获取单元格组合
-    this.dndService.dndContainer.subscribe((result: DndComponent) => {
-      this.dndContainer = result;
-      // 是否可拖拽
-      if (this.dndContainer.draggable) {
-        this.render.setAttribute(this.el.nativeElement, 'draggable', 'true');
-      }
-      // 是否可交换
-      this.swapable = this.dndContainer.swapable;
-      // 网格组合
-      this.dndCells = this.dndContainer.dndCells;
-    });
-
-    // 避免脏值检测
-    this.ngZone.runOutsideAngular(() => {
-      // 绑定mousedown事件
-      // 绑定dragstart事件
-      this.dragStartEvent = this.dragStart.bind(this);
-      this.el.nativeElement.addEventListener('dragstart', this.dragStartEvent);
-
-      // 绑定resize事件
-    });
-    this.render.setStyle(this.el.nativeElement, 'transition', '.3s');
-
-
+    // 添加变换延时
   }
 
   ngOnDestroy() {
     // 解绑
-    this.el.nativeElement.removeEventListener(this.dragStartEvent);
-    this.el.nativeElement.removeEventListener(this.dragEndEvent);
+    if (this.dragStartEvent) {
+      this.el.nativeElement.removeEventListener('dragstart', this.dragStartEvent);
+    }
+    if (this.dragEndEvent) {
+      this.el.nativeElement.removeEventListener('dragend', this.dragEndEvent);
+    }
+    if (this.resizeMouseUpEvent) {
+      document.removeEventListener('mouseup', this.resizeMouseUpEvent);
+    }
   }
 
-  // 当前网格尺寸
+  // 设置当前网格尺寸
   doSetSize(width: number, height: number) {
     this.render.setStyle(this.el.nativeElement, 'width', `${width}px`);
     this.render.setStyle(this.el.nativeElement, 'height', `${height}px`);
   }
 
-  // 当前网格位置
+  // 设置当前网格位置
   doSetPosition(left: number, top: number) {
-    // this.render.setStyle(this.el.nativeElement, 'transform', `translate(${this.x * this.cellWidth}px,${this.y * this.cellHeight}px)`);
     this.render.setStyle(this.el.nativeElement, 'left', `${left}px`);
     this.render.setStyle(this.el.nativeElement, 'top', `${top}px`);
-    // this.initialCellTop = this.y * this.cellHeight;
-    // this.initialCellLeft = this.x * this.cellWidth;
   }
 
+  gridMouseDown(e: any) {
+    if (!this.gridContainer.draggable) {
+      return;
+    }
+    // 避免脏值检测
+    this.ngZone.runOutsideAngular(() => {
+      // 绑定mousedown事件
+      // 绑定dragstart事件
+      this.el.nativeElement.draggable = true;
+      this.dragStartEvent = this.dragStart.bind(this) || null;
+      this.el.nativeElement.addEventListener('dragstart', this.dragStartEvent);
+      // 绑定resize事件
+    });
+
+  }
   // dragstart 传递参数  并且绑定dragover dragEnd事件
   dragStart(e: any) {
     this.dragging = true;
@@ -153,16 +136,14 @@ export class DndGridComponent implements DndGridOptions, OnInit, OnDestroy {
     // e.dataTransfer.setData('text', this.identify);
     // 获取初始化鼠标和单元格位置
     const { mouseX, mouseY } = this.originalMouseXY(e);
-    const { top, left } = this.originalSize();
     this.originalMouseLeft = mouseX;
     this.originalMouseTop = mouseY;
-    this.originalGridLeft = left;
-    this.originalGridTop = top;
-
+    this.originalGridLeft = this.el.nativeElement.offsetLeft;
+    this.originalGridTop = this.el.nativeElement.offsetTop;
     // 绑定 dragover  dragEnd
     this.ngZone.runOutsideAngular(() => {
-      this.dragOverEvent = this.dragOver.bind(this);
-      this.dragEndEvent = this.dragEnd.bind(this);
+      this.dragOverEvent = this.dragOver.bind(this) || null;
+      this.dragEndEvent = this.dragEnd.bind(this) || null;
       document.addEventListener('dragover', this.dragOverEvent);
       this.el.nativeElement.addEventListener('dragend', this.dragEndEvent);
     });
@@ -174,7 +155,6 @@ export class DndGridComponent implements DndGridOptions, OnInit, OnDestroy {
     if (!this.dragging) {
       return;
     }
-    // todo
     // 计算当前单元格的位置  检查是否存在冲突
     e.preventDefault();
     this.calculateOffsetPosition(e);
@@ -185,35 +165,40 @@ export class DndGridComponent implements DndGridOptions, OnInit, OnDestroy {
     // 解绑
     this.dragging = false;
     // 解绑dragOver
-    document.removeEventListener('dragover', this.dragOverEvent);
+    if (this.dragOverEvent) {
+      document.removeEventListener('dragover', this.dragOverEvent);
+    }
   }
   // 拖拽过程  计算网格位置
   private calculateOffsetPosition(e: any) {
     // 获取偏移坐标
     const offsetCoordinate = this.dndOffsetXY(e);
     // 位置冲突且不是同一个网格  dragover会出现同一个网格冲突的状况  通过identify标识来检测
-    const conflictCell = this.dndService.checkPositionConflicts(this.dndCells, offsetCoordinate);
+    const conflictCell = this.gridContainer.checkPositionConflicts(offsetCoordinate);
     if (conflictCell && conflictCell.identify !== this.identify) {
       // 如果允许交换 则交换网格
-      if (this.swapable) {
+      if (this.gridContainer.swapable) {
         this.dndService.swapGrid(this, conflictCell);
-        conflictCell.doSetPosition(conflictCell.x * conflictCell.cellWidth, conflictCell.y * conflictCell.cellHeight);
+        conflictCell.doSetPosition(conflictCell.x * this.gridContainer.cellWidth, conflictCell.y * this.gridContainer.cellHeight);
       }
       // 如果不允许交换  冲突网格要移位 todo
     } else {
       // 没有冲突的情况
       this.x = offsetCoordinate.x;
       this.y = offsetCoordinate.y;
+      // 越界处理
+      this.checkScope(this.x * this.gridContainer.cellWidth, this.y * this.gridContainer.cellHeight);
     }
-    this.doSetPosition(this.x * this.cellWidth, this.y * this.cellHeight);
-    // this.checkScope();
+
+    this.doSetPosition(this.x * this.gridContainer.cellWidth, this.y * this.gridContainer.cellHeight);
   }
 
-  // resize handler mousedown
-  mousedown(e: any) {
-    e.preventDefault();
-    e.stopPropagation();
+  // 鼠标按下事件
+  resizeMousedown(e: any) {
     if (!e.target.classList.contains('dnd-grid-resize-handler')) {
+      return;
+    }
+    if (!this.gridContainer.resizable) {
       return;
     }
     this.resizeDirection = e.target.classList.item(1).split('-')[1];
@@ -222,24 +207,25 @@ export class DndGridComponent implements DndGridOptions, OnInit, OnDestroy {
     // 初始化移动前位置
     this.originalMouseLeft = this.originalMouseXY(e).mouseX;
     this.originalMouseTop = this.originalMouseXY(e).mouseY;
-    const { top, left, width, height, bottom, right } = this.originalSize();
-    this.originalGridTop = top;
-    this.originalGridLeft = left;
-    this.originalGridBottom = bottom;
-    this.originalGridRight = right;
-    this.height = height;
-    this.width = width;
+    // const { top, left, width, height, bottom, right } = this.originalSize();
+    this.originalGridTop = this.el.nativeElement.offsetTop;
+    this.originalGridLeft = this.el.nativeElement.offsetLeft;
+    this.height = this.el.nativeElement.offsetHeight;
+    this.width = this.el.nativeElement.offsetWidth;
 
-
+    // 绑定鼠标事件
     this.ngZone.runOutsideAngular(() => {
-      this.mouseMoveEvent = this.mousemove.bind(this);
-      this.mouseUpEvent = this.mouseup.bind(this);
-      document.addEventListener('mousemove', this.mouseMoveEvent);
-      document.addEventListener('mouseup', this.mouseUpEvent);
+      this.resizeMouseMoveEvent = this.resizeMousemove.bind(this) || null;
+      this.resizeMouseUpEvent = this.resizeMouseup.bind(this) || null;
+      document.addEventListener('mousemove', this.resizeMouseMoveEvent);
+      document.addEventListener('mouseup', this.resizeMouseUpEvent);
     });
   }
 
-  mousemove(e: any) {
+  // 鼠标移动事件
+  resizeMousemove(e: any) {
+    e.preventDefault();
+    e.stopPropagation();
     // 鼠标当前位置
     const mouseX = e.clientX;
     const mouseY = e.clientY;
@@ -254,19 +240,20 @@ export class DndGridComponent implements DndGridOptions, OnInit, OnDestroy {
     };
     // 不同方向 缩放调整位置
     const { width, height, left, top } = this.resizeService.resizeByDirection({ width: this.width, height: this.height },
-      { left: this.originalGridLeft, top: this.originalGridTop }, this.resizeOffsetXY(originalXY, mouseXY))[this.resizeDirection];
+      { left: this.originalGridLeft, top: this.originalGridTop },
+      this.resizeService.resizeOffsetXY(originalXY, mouseXY))[this.resizeDirection];
     // 重新设置网格尺寸和位置
     this.doSetSize(width, height);
     this.doSetPosition(left, top);
   }
 
-  mouseup(e: any) {
-    document.removeEventListener('mousemove', this.mouseMoveEvent);
-    this.render.setStyle(this.el.nativeElement, 'transition', '.3s');
-
+  // 鼠标抬起事件
+  resizeMouseup(e: any) {
+    if (this.resizeMouseMoveEvent) {
+      document.removeEventListener('mousemove', this.resizeMouseMoveEvent);
+    }
+    this.render.setStyle(this.el.nativeElement, 'transition', '.2s');
   }
-
-
 
   // 鼠标初始位置
   private originalMouseXY(e: any) {
@@ -275,29 +262,27 @@ export class DndGridComponent implements DndGridOptions, OnInit, OnDestroy {
       mouseY: e.clientY
     };
   }
-  // 网格原始位置及尺寸
-  private originalSize() {
-    return this.el.nativeElement.getBoundingClientRect();
-  }
 
-  // 检测是否越界
-  checkScope() {
-    const { width, height, left, top } = this.dndContainer;
-    // const { clientX, clientY } = e;
-    const clientRect = this.el.nativeElement.getBoundingClientRect();
-    if (clientRect.left < left) {
-      this.render.setStyle(this.el.nativeElement, 'left', `${left}px`);
-    }
-    if (clientRect.top < top) {
-      this.render.setStyle(this.el.nativeElement, 'top', `${top}px`);
-    }
-    if (clientRect.right > left + width) {
-      // this.render.setStyle(this.el.nativeElement, 'left', `${left + width - this.size.width}px`);
-    }
-    if (clientRect.bottom > top + height) {
-      // this.render.setStyle(this.el.nativeElement, 'top', `${top + height - this.size.height}px`);
-    }
-    return false;
+  // 比较网格与容器的相对距离 检测是否越界
+  private checkScope(currentOffsetLeft: number, currentOffsetTop: number) {
+    // 容器尺寸
+    const containerWidth = this.gridContainer.width;
+    const containerHeight = this.gridContainer.height;
+    // 网格尺寸
+    const width = this.cols * this.gridContainer.cellWidth;
+    const height = this.rows * this.gridContainer.cellHeight;
+    // 合法边界大小
+    const leftOffset = 0;
+    const rightOffset = containerWidth - width;
+    const topOffset = 0;
+    const bottomOffset = containerHeight - height;
+    // 左右
+    const realOffsetLeft = Math.min(Math.max(currentOffsetLeft, leftOffset), rightOffset);
+    // 上下
+    const realOffsetTop = Math.min(Math.max(currentOffsetTop, topOffset), bottomOffset);
+    // 重新计算坐标
+    this.x = Math.round(realOffsetLeft / this.gridContainer.cellWidth);
+    this.y = Math.round(realOffsetTop / this.gridContainer.cellHeight);
   }
 
   // 获取网格拖拽偏移坐标
@@ -306,21 +291,9 @@ export class DndGridComponent implements DndGridOptions, OnInit, OnDestroy {
     const mouseY = e.clientY;
     // 计算方法 偏移量+初始化位置  根据坐标计算位置
     return {
-      x: Math.round((mouseX - this.originalMouseLeft + this.originalGridLeft) / this.cellWidth),
-      y: Math.round((mouseY - this.originalMouseTop + this.originalGridTop) / this.cellHeight)
+      x: Math.round((mouseX - this.originalMouseLeft + this.originalGridLeft) / this.gridContainer.cellWidth),
+      y: Math.round((mouseY - this.originalMouseTop + this.originalGridTop) / this.gridContainer.cellHeight)
     };
   }
 
-
-  /* 获取缩放网格偏移量 */
-  private resizeOffsetXY(originalXY: any, mouseXY: any) {
-    // 当前鼠标位置
-    const { mouseX, mouseY } = mouseXY;
-    // 上次鼠标位置
-    const { originalX, originalY } = originalXY;
-    return {
-      offsetX: mouseX - originalX,
-      offsetY: mouseY - originalY
-    };
-  }
 }

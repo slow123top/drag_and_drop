@@ -1,11 +1,22 @@
 <!--The content below is only a placeholder and can be replaced.-->
-<div style="width:1200px;height:600px;">
-  <dnd [rows]="5" [cols]="6">
+<div class="dnd-container">
+  <dnd [rows]="5" [cols]="6" [draggable]="true">
     <dnd-grid *ngFor="let cell of cellInfo;trackBy: trackById" [rows]="cell.rows" [cols]="cell.cols" [x]="cell.x"
       [y]="cell.y" [identify]="cell.identify">
       {{cell.identify}}
     </dnd-grid>
   </dnd>
+  <!-- <div class="dnd-container-child"></div> -->
+</div>
+
+<div class="dnd-container">
+  <dnd [rows]="5" [cols]="6" [draggable]="true">
+    <dnd-grid *ngFor="let cell of cellInfo;trackBy: trackById" [rows]="cell.rows" [cols]="cell.cols" [x]="cell.x"
+      [y]="cell.y" [identify]="cell.identify">
+      {{cell.identify}}
+    </dnd-grid>
+  </dnd>
+  <!-- <div class="dnd-container-child"></div> -->
 </div>
 
 <!-- <div draggable="true">文本框</div> -->

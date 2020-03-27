@@ -1,11 +1,11 @@
-import { Component, Renderer2, ViewChild, ElementRef } from '@angular/core';
+import { Component, Renderer2, ViewChild, ElementRef, OnInit } from '@angular/core';
 import { DndModule } from 'dnd';
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
 
   @ViewChild('resizeDiv') resizeDiv: ElementRef;
   title = 'farris-dnd';
@@ -36,9 +36,28 @@ export class AppComponent {
   detalY: number;
 
 
-  constructor(private render: Renderer2) {
+  constructor(private render: Renderer2, private el: ElementRef) {
   }
 
+  ngOnInit() {
+    // console.log(this.el.nativeElement.querySelector('.dnd-container'));
+    // const child = this.el.nativeElement.querySelector('.dnd-container-child');
+    // console.log(`offsetWidth:${child.offsetWidth}`);
+    // console.log(`offsetHeight:${child.offsetHeight}`);
+    // console.log(`offsetTop:${child.offsetTop}`);
+    // console.log(`offsetLeft:${child.offsetLeft}`);
+    // console.log(`clientWidth:${child.clientWidth}`);
+    // console.log(`clientHeight:${child.clientHeight}`);
+    // console.log(`clientTop:${child.clientTop}`);
+    // console.log(`scrollWidth:${child.scrollWidth}`);
+    // console.log(`scrollHeight:${child.scrollHeight}`);
+    // console.log(`scrollTop:${child.scrollTop}`);
+    // console.log(`left:${child.style.left}`);
+    // console.log(`top:${child.top}`);
+
+    // console.log(`clientWidth:${child.offsetWidth}`);
+    // console.log(`clientWidth:${child.offsetWidth}`);
+  }
   trackById(index, item) {
     return item.identify;
   }
@@ -89,6 +108,10 @@ export class AppComponent {
     document.removeEventListener('mousemove', this.mouseMoveEvent);
     this.originalTop = this.originalTop + this.detalY;
     this.originalHeight = this.originalHeight - this.detalY;
+  }
+
+  removeGrid(e: any, grid: any) {
+    this.cellInfo.splice(this.cellInfo.findIndex(cell => grid.identify === cell.identify), 1);
   }
 
 

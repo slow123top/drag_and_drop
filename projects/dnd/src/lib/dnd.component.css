@@ -1,6 +1,6 @@
 :host {
-    position: relative;
     box-sizing: border-box;
+    position: relative;
     background: grey;
     width: 100%;
     height: 100%;

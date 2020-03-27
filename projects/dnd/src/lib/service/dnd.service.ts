@@ -57,18 +57,4 @@ export class DndService {
         draggedCell.lastX = draggedCell.x;
         draggedCell.lastY = draggedCell.y;
     }
-
-    /* 缩放网格 */
-    resizeGrid(originalXY: any, mouseXY: any) {
-        // 当前鼠标位置
-        const { mouseX, mouseY } = mouseXY;
-        // 上次鼠标位置
-        const originalX = originalXY.originalMouseLeft;
-        const originalY = originalXY.originalMouseTop;
-        return {
-            offsetX: mouseX - originalX,
-            offsetY: mouseY - originalY
-        };
-    }
-
 }
